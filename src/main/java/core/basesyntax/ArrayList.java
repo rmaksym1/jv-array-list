@@ -3,9 +3,9 @@ package core.basesyntax;
 import java.util.NoSuchElementException;
 
 public class ArrayList<T> implements List<T> {
+    private static final int DEFAULT_CAPACITY = 10;
     private T[] elementData;
     private int size;
-    private static final int DEFAULT_CAPACITY = 10;
 
     public ArrayList() {
         elementData = (T[]) new Object[DEFAULT_CAPACITY];
@@ -48,7 +48,9 @@ public class ArrayList<T> implements List<T> {
 
     @Override
     public void addAll(List<T> list) {
-        if (list == null) return;
+        if (list == null) {
+            return;
+        }
         while (size + list.size() > elementData.length) {
             resize();
         }
@@ -79,10 +81,11 @@ public class ArrayList<T> implements List<T> {
         if (index < 0 || index >= size) {
             throw new ArrayListIndexOutOfBoundsException("Index out of range");
         }
-        T removed = elementData[index];
+        final T removed = elementData[index];
         for (int j = index; j < size - 1; j++) {
             elementData[j] = elementData[j + 1];
         }
+
         elementData[size - 1] = null;
         size--;
         return removed;
@@ -102,7 +105,7 @@ public class ArrayList<T> implements List<T> {
                 }
             } else {
                 if (elementData[i] != null && elementData[i].equals(element)) {
-                    T removed = elementData[i];
+                    final T removed = elementData[i];
                     for (int j = i; j < size - 1; j++) {
                         elementData[j] = elementData[j + 1];
                     }
