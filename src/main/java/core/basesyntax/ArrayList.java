@@ -4,6 +4,7 @@ import java.util.NoSuchElementException;
 
 public class ArrayList<T> implements List<T> {
     private static final int DEFAULT_CAPACITY = 10;
+    private static final double GROWTH_FACTOR = 1.5;
     private T[] elementData;
     private int size;
 
@@ -14,11 +15,9 @@ public class ArrayList<T> implements List<T> {
 
     private void resize() {
         int oldCapacity = elementData.length;
-        int newCapacity = oldCapacity + oldCapacity / 2;
+        int newCapacity = (int) (oldCapacity * 1.5);
         T[] newData = (T[]) new Object[newCapacity];
-        for (int i = 0; i < size; i++) {
-            newData[i] = elementData[i];
-        }
+        System.arraycopy(elementData, 0, newData, 0, size);
         elementData = newData;
     }
 
@@ -33,15 +32,11 @@ public class ArrayList<T> implements List<T> {
 
     @Override
     public void add(T value, int index) {
-        if (index < 0 || index > size) {
-            throw new ArrayListIndexOutOfBoundsException("Index out of range");
-        }
+        checkIndexForAdd(index);
         if (size == elementData.length) {
             resize();
         }
-        for (int i = size; i > index; i--) {
-            elementData[i] = elementData[i - 1];
-        }
+        System.arraycopy(elementData, index, elementData, index + 1, size - index);
         elementData[index] = value;
         size++;
     }
@@ -49,43 +44,34 @@ public class ArrayList<T> implements List<T> {
     @Override
     public void addAll(List<T> list) {
         if (list == null) {
-            return;
+            throw new NullPointerException("List is null");
         }
         while (size + list.size() > elementData.length) {
             resize();
         }
         for (int i = 0; i < list.size(); i++) {
-            elementData[size] = list.get(i);
-            size++;
+            elementData[size + i] = list.get(i);
         }
+        size += list.size();
     }
 
     @Override
     public T get(int index) {
-        if (index < 0 || index >= size) {
-            throw new ArrayListIndexOutOfBoundsException("Index out of range");
-        }
+        checkIndex(index);
         return elementData[index];
     }
 
     @Override
-    public void set(T value, int index) {
-        if (index < 0 || index >= size) {
-            throw new ArrayListIndexOutOfBoundsException("Index out of range");
-        }
-        elementData[index] = value;
+    public void set(T element, int index) {
+        checkIndex(index);
+        elementData[index] = element;
     }
 
     @Override
     public T remove(int index) {
-        if (index < 0 || index >= size) {
-            throw new ArrayListIndexOutOfBoundsException("Index out of range");
-        }
+        checkIndex(index);
         final T removed = elementData[index];
-        for (int j = index; j < size - 1; j++) {
-            elementData[j] = elementData[j + 1];
-        }
-
+        System.arraycopy(elementData, index + 1, elementData, index, size - index - 1);
         elementData[size - 1] = null;
         size--;
         return removed;
@@ -96,9 +82,7 @@ public class ArrayList<T> implements List<T> {
         for (int i = 0; i < size; i++) {
             if (element == null) {
                 if (elementData[i] == null) {
-                    for (int j = i; j < size - 1; j++) {
-                        elementData[j] = elementData[j + 1];
-                    }
+                    System.arraycopy(elementData, i + 1, elementData, i, size - i - 1);
                     elementData[size - 1] = null;
                     size--;
                     return null;
@@ -106,16 +90,30 @@ public class ArrayList<T> implements List<T> {
             } else {
                 if (elementData[i] != null && elementData[i].equals(element)) {
                     final T removed = elementData[i];
-                    for (int j = i; j < size - 1; j++) {
-                        elementData[j] = elementData[j + 1];
-                    }
+                    System.arraycopy(elementData, i + 1, elementData, i, size - i - 1);
                     elementData[size - 1] = null;
                     size--;
                     return removed;
                 }
             }
         }
-        throw new NoSuchElementException("Element not found");
+        throw new NoSuchElementException("Element not found: " + element);
+    }
+
+    private void checkIndex(int index) {
+        if (index < 0 || index >= size) {
+            throw new ArrayListIndexOutOfBoundsException(
+                    "Index: " + index + ", Size: " + size
+            );
+        }
+    }
+
+    private void checkIndexForAdd(int index) {
+        if (index < 0 || index > size) {
+            throw new ArrayListIndexOutOfBoundsException(
+                    "Index: " + index + ", Size: " + size
+            );
+        }
     }
 
     @Override
@@ -125,9 +123,6 @@ public class ArrayList<T> implements List<T> {
 
     @Override
     public boolean isEmpty() {
-        if (size > 0) {
-            return false;
-        }
-        return true;
+        return size == 0;
     }
 }
