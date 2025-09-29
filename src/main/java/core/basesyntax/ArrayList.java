@@ -15,18 +15,18 @@ public class ArrayList<T> implements List<T> {
 
     private void resize() {
         int oldCapacity = elementData.length;
-        int newCapacity = (int) (oldCapacity * 1.5);
+        int newCapacity = (int) (oldCapacity * GROWTH_FACTOR);
         T[] newData = (T[]) new Object[newCapacity];
         System.arraycopy(elementData, 0, newData, 0, size);
         elementData = newData;
     }
 
     @Override
-    public void add(T value) {
+    public void add(T element) {
         if (size == elementData.length) {
             resize();
         }
-        elementData[size] = value;
+        elementData[size] = element;
         size++;
     }
 
